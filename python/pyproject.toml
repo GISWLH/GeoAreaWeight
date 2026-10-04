@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geoareaweight"
+version = "0.1.0"
+description = "Area (cos-latitude / exact cell-area / WGS84) weights and weighted means for lat-lon grids"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Longhao Wang", email = "hhuwlh@163.com"}]
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.20"]
+[project.optional-dependencies]
+xarray = ["xarray"]
+test = ["pytest", "xarray"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[project.urls]
+Homepage = "https://github.com/GISWLH/GeoAreaWeight"

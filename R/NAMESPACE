@@ -1,0 +1,3 @@
+export(area_mean, region_mean, area_integral, area_fraction, area_weights,
+       cos_lat_weights, band_weights, cell_area, weights_2d, infer_bounds,
+       authalic_sin_lat, authalic_radius)

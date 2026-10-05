@@ -1,7 +1,20 @@
-import warnings, numpy as np, xarray as xr
-warnings.filterwarnings("ignore")
+"""Shared helpers for the experiment scripts.
+
+Set GAW_DATA_DIR to the folder holding the downloaded NetCDF files (see docs/EXPERIMENTS.md);
+results are written to docs/ of this repository.
+"""
+import os
+import warnings
+from pathlib import Path
+
+import numpy as np
+import xarray as xr
+
 import geoareaweight as gaw
-D = "/workspace/geoareaweight/data"
+
+warnings.filterwarnings("ignore")
+D = os.environ.get("GAW_DATA_DIR", str(Path(__file__).resolve().parents[1] / "data"))
+DOCS = Path(__file__).resolve().parents[1] / "docs"
 SEC = 86400.0
 
 def op(fn, **kw):
@@ -10,15 +23,12 @@ def op(fn, **kw):
 
 def annual(da):
     """Annual mean of a monthly series (day-weighted), complete years only."""
-    da = da.sel(time=slice(None, None))
     yrs = da.time.dt.year
-    cnt = da.groupby(yrs).count("time")  # not used
     n = da.time.groupby(yrs).count()
     full = n.year[n == 12]
     da = da.sel(time=yrs.isin(full))
     w = da.time.dt.days_in_month
-    out = (da * w).groupby(da.time.dt.year).sum("time", skipna=False) / w.groupby(da.time.dt.year).sum()
-    return out.rename(year="year")
+    return (da * w).groupby(da.time.dt.year).sum("time", skipna=False) / w.groupby(da.time.dt.year).sum()
 
 def trend_per_decade(y, years):
     m = np.isfinite(y)

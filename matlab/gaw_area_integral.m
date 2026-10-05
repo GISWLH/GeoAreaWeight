@@ -1,16 +1,26 @@
 function out = gaw_area_integral(x, lat, lon, varargin)
-%GAW_AREA_INTEGRAL  sum(x .* cellArea) over the grid (flux per area -> total). NaN skipped.
-%   options: 'Ellipsoid' (false), 'Mask', 'LatBounds', 'LonBounds', 'LatDim' (2), 'LonDim' (1), 'Units' ('m2')
-    o = struct('Ellipsoid', false, 'Mask', [], 'LatBounds', [], 'LonBounds', [], 'LatDim', 2, 'LonDim', 1, 'Units', 'm2');
-    for k = 1:2:numel(varargin), o.(varargin{k}) = varargin{k+1}; end
-    A = gaw_cell_area(lat, lon, o.LatBounds, o.LonBounds, o.Ellipsoid, [], o.Units);
-    if ~isempty(o.Mask), A = A .* double(o.Mask ~= 0); end
-    d = size(x); nd = max(numel(d), max(o.LatDim, o.LonDim)); d(end+1:nd) = 1;
-    rest = setdiff(1:nd, [o.LatDim o.LonDim]);
-    xa = permute(double(x), [o.LatDim o.LonDim rest]);
-    nrest = prod(d(rest)); if isempty(rest), nrest = 1; end
-    xa = reshape(xa, d(o.LatDim) * d(o.LonDim), nrest);
-    xa(~isfinite(xa)) = 0;
-    res = sum(xa .* repmat(A(:), 1, nrest), 1);
-    if isempty(rest), out = res; elseif numel(rest) == 1, out = res(:); else, out = reshape(res, d(rest)); end
+%GAW_AREA_INTEGRAL  Area integral sum(x .* cellArea) over the grid (per-area flux -> total).
+%   t = gaw_area_integral(x, lat, lon)             x is lon x lat (x time ...); result in x-units * m2
+%   t = gaw_area_integral(x, lat, lon, 'Units', 'km2', 'Mask', M, ...)
+%
+%   Name-value options (case-insensitive):
+%     'Ellipsoid' false (default) | true: WGS84 cell areas
+%     'Radius'    sphere radius [m], default 6371008.8
+%     'Units'     'm2' (default) | 'km2'
+%     'Weights'   nlat x nlon cell areas to use instead (any unit)
+%     'Mask', 'LatBounds', 'LonBounds', 'LatDim' (2), 'LonDim' (1)
+%     'SkipNaN'   true (default): NaN cells contribute 0; NaN only if no valid cell
+%
+%   See also GAW_CELL_AREA, GAW_AREA_MEAN.
+    o = gaw_parse_options(struct('Ellipsoid', false, 'Radius', [], 'Units', 'm2', 'Weights', [], ...
+                                 'Mask', [], 'LatBounds', [], 'LonBounds', [], 'LatDim', 2, ...
+                                 'LonDim', 1, 'SkipNaN', true), varargin, 'gaw_area_integral');
+    d = size(x); d(end+1:max(o.LatDim, o.LonDim)) = 1;
+    if isempty(o.Weights)
+        if isempty(lat) || isempty(lon), error('gaw:args', 'lat and lon (or ''Weights'') are required'); end
+        A = gaw_cell_area(lat, lon, o.LatBounds, o.LonBounds, o.Ellipsoid, o.Radius, o.Units);
+    else
+        A = gaw_grid_field(o.Weights, d(o.LatDim), d(o.LonDim), 'Weights', 'weights');
+    end
+    out = gaw_core(x, A, o.LatDim, o.LonDim, o.Mask, o.SkipNaN, 'sum');
 end

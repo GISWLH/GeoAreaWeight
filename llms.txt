@@ -1,0 +1,52 @@
+# GeoAreaWeight
+
+> Correct area weights and area-weighted statistics (mean, regional mean, total, area fraction) for latitude-longitude grids, with identical APIs in Python (package `geoareaweight`, NumPy/xarray), R (package `geoareaweight`) and MATLAB/Octave (functions `gaw_*`). Use it instead of a plain mean over lat/lon, which over-weights high latitudes because cell area shrinks with cos(latitude).
+
+Key facts for correct use:
+
+- Angles are degrees. `lat`/`lon` are 1-D cell centres (ascending or descending, regular or irregular; lon may wrap). Latitudes outside [-90, 90] raise an error.
+- Default method `"band"` = exact spherical cell area (sin(lat_north) - sin(lat_south)) x dlon. Others: `"cos"` (cos of centre latitude), `"ellipsoid"` (exact WGS84), `"none"` (plain mean, comparison only).
+- 2-D weights / areas / masks are shaped (nlat, nlon); an (nlon, nlat) field is transposed automatically when nlat != nlon.
+- All statistics keep non-spatial dimensions (time, level, ...), skip NaN and renormalise weights over valid cells per step; NaN if no valid cell. `skipna=False` propagates NaN.
+- Masks: True / non-zero = include; False / 0 / NaN = exclude.
+- Python NumPy input: data axes given by `lat_axis=-2, lon_axis=-1`. Python xarray input: lat/lon found from CF attributes or names (lat, latitude, nav_lat, rlat / lon, longitude, nav_lon, rlon); dim order irrelevant; DataArray mask/weights aligned by labels; dask stays lazy; DataArray in -> DataArray out.
+- R and MATLAB data layout default: lon x lat x time (ncdf4 / ncread order): `lon_dim = 1, lat_dim = 2` (R), `'LonDim', 1, 'LatDim', 2` (MATLAB).
+- Use `area_mean` for intensive quantities (temperature, precipitation rate); `area_integral` for totals (multiply per-area quantity by cell area).
+- For area fractions, NaN data must be excluded explicitly: `area_fraction(spei <= -1, valid=spei.notnull())` (comparison with NaN gives False).
+- Curvilinear grids (2-D lat): only cos(lat) is possible; pass model cell areas (CMIP `areacella`) via `weights=` / `'Weights'` for exact results.
+
+## Python API (import geoareaweight as gaw)
+
+- `gaw.area_mean(x, lat=None, lon=None, *, method="band", weights=None, mask=None, lat_bounds=None, lon_bounds=None, lat_axis=-2, lon_axis=-1, lat_name=None, lon_name=None, skipna=True)` -> array/DataArray without lat/lon dims
+- `gaw.region_mean(x, lat=None, lon=None, mask=..., **kw)` -> `area_mean` with required mask
+- `gaw.area_integral(x, lat=None, lon=None, *, ellipsoid=False, radius=None, weights=None, mask=None, lat_bounds=None, lon_bounds=None, lat_axis=-2, lon_axis=-1, lat_name=None, lon_name=None, units="m2", skipna=True)` -> sum(x * cell_area)
+- `gaw.area_fraction(cond, lat=None, lon=None, *, valid=None, **area_mean_kwargs)` -> fraction 0-1
+- `gaw.cell_area(lat, lon=None, lat_bounds=None, lon_bounds=None, ellipsoid=False, radius=None, units="m2")` -> (nlat, nlon) areas; without lon: (nlat,) area per radian of longitude
+- `gaw.weights_2d(lat, lon=None, lat_bounds=None, lon_bounds=None, method="band", normalize=True)` -> (nlat, nlon)
+- `gaw.area_weights(lat, lat_bounds=None, method="band", normalize=True)` -> (nlat,)
+- `gaw.band_weights(lat, lat_bounds=None, ellipsoid=False, normalize=True)`, `gaw.cos_lat_weights(lat)`, `gaw.infer_bounds(centers, lo=None, hi=None)`, `gaw.authalic_sin_lat(lat_deg)`, `gaw.authalic_radius()`
+- Constants: `EARTH_RADIUS = 6371008.8` m (IUGG R1), `WGS84_A`, `WGS84_F`, `WGS84_E2`, `METHODS`
+
+## R API
+
+- `area_mean(x, lat, lon, method = "band", weights = NULL, mask = NULL, lat_bounds = NULL, lon_bounds = NULL, lat_dim = 2, lon_dim = 1, skipna = TRUE)`
+- `region_mean(x, lat, lon, mask, ...)`, `area_integral(x, lat, lon, ellipsoid = FALSE, mask = NULL, ..., units = "m2", radius = NULL, weights = NULL, skipna = TRUE)`, `area_fraction(cond, lat, lon, valid = NULL, ...)`
+- `cell_area`, `weights_2d`, `area_weights`, `band_weights`, `cos_lat_weights`, `infer_bounds`, `authalic_sin_lat`, `authalic_radius` (same arguments as Python)
+
+## MATLAB / Octave API (addpath('matlab'))
+
+- `gaw_area_mean(x, lat, lon, 'Method', 'band', 'Weights', [], 'Mask', [], 'LatBounds', [], 'LonBounds', [], 'LatDim', 2, 'LonDim', 1, 'SkipNaN', true)` (option names case-insensitive)
+- `gaw_region_mean(x, lat, lon, mask, ...)`, `gaw_area_integral(x, lat, lon, 'Ellipsoid', false, 'Radius', [], 'Units', 'm2', 'Weights', [], 'Mask', [], ...)`, `gaw_area_fraction(cond, lat, lon, 'Valid', v, ...)`
+- `gaw_cell_area(lat, lon, latBounds, lonBounds, ellipsoid, radius, units)`, `gaw_weights_2d(lat, lon, latBounds, lonBounds, method, normalize)`, `gaw_area_weights(lat, latBounds, method, normalize)`, `gaw_band_weights`, `gaw_cos_lat_weights`, `gaw_infer_bounds`, `gaw_authalic_sin_lat`, `gaw_authalic_radius`
+
+## Docs
+
+- [README](https://github.com/GISWLH/GeoAreaWeight/blob/main/README.md): overview, conventions, methods, pitfalls
+- [Python README](https://github.com/GISWLH/GeoAreaWeight/blob/main/python/README.md): Python usage
+- [Experiments](https://github.com/GISWLH/GeoAreaWeight/blob/main/docs/EXPERIMENTS.md): size of the unweighted-mean bias on real datasets
+- [Literature](https://github.com/GISWLH/GeoAreaWeight/blob/main/docs/LITERATURE.md): retractions and related studies
+
+## Optional
+
+- [Examples](https://github.com/GISWLH/GeoAreaWeight/tree/main/examples)
+- [Cross-language validation](https://github.com/GISWLH/GeoAreaWeight/tree/main/validation)

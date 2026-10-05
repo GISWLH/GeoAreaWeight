@@ -382,7 +382,7 @@
   }
  ],
  "synthetic": {
-  "常数场": {
+  "constant field": {
    "unw": 5.0,
    "w": 5.0
   },
@@ -390,19 +390,19 @@
    "unw": 0.6366278526673906,
    "w": 0.7853881948536541
   },
-  "|lat| (南北向线性梯度)": {
+  "|lat| (linear meridional gradient)": {
    "unw": 45.0,
    "w": 32.7056749353452
   },
-  "纬向平均气温型 30cos²φ-10": {
+  "temperature-like profile 30cos²φ-10": {
    "unw": 5.0,
    "w": 9.999746132817185
   },
-  "白噪声场 差值(unw-w) 均值/标准差": {
+  "white-noise fields: unweighted - weighted, mean/std": {
    "mean": 8.200582658887613e-05,
    "std": 0.0019790816852020897
   },
-  "极地放大型趋势 s=0.15+b|φ|/90": {
+  "polar-amplified trend s=0.15+b|φ|/90": {
    "0.0": {
     "unw": 0.14999999999999994,
     "w": 0.15
@@ -427,7 +427,7 @@
  },
  "gap_vs_latvar": [
   {
-   "name": "NCEP R1 气温(全球)",
+   "name": "NCEP R1 air temperature (global)",
    "mean_unw": 277.9312294701734,
    "mean_w": 287.3065896110316,
    "sigma": 13.99627041567305,
@@ -435,7 +435,7 @@
    "gap_over_sigma": -0.6698470279882327
   },
   {
-   "name": "CRU 气温(陆地)",
+   "name": "CRU air temperature (land)",
    "mean_unw": 8.766966311434473,
    "mean_w": 13.745212459386815,
    "sigma": 13.194448414311362,
@@ -443,7 +443,7 @@
    "gap_over_sigma": -0.3772985419043881
   },
   {
-   "name": "GPCC 降水(陆地)",
+   "name": "GPCC precipitation (land)",
    "mean_unw": 776.0331870880322,
    "mean_w": 904.2755273500121,
    "sigma": 851.3255542468805,
@@ -451,7 +451,7 @@
    "gap_over_sigma": -0.15063842453951554
   },
   {
-   "name": "GPCP 降水(全球)",
+   "name": "GPCP precipitation (global)",
    "mean_unw": 818.4443903639061,
    "mean_w": 982.6432000580421,
    "sigma": 707.1667153112629,
@@ -459,7 +459,7 @@
    "gap_over_sigma": -0.23219250303920638
   },
   {
-   "name": "SPEI-12 时间均值",
+   "name": "SPEI-12 time mean",
    "mean_unw": -0.08607849089337812,
    "mean_w": -0.10710002639212175,
    "sigma": 0.3075919229406237,
@@ -467,7 +467,7 @@
    "gap_over_sigma": 0.06834228707234796
   },
   {
-   "name": "SPEI≤−1 出现频率",
+   "name": "SPEI <= -1 frequency",
    "mean_unw": 0.21387368990257594,
    "mean_w": 0.21939206688898882,
    "sigma": 0.11031471173128675,

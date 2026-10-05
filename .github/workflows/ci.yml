@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest
+      - name: Build and check distributions
+        run: python -m build && twine check --strict dist/*
+
+  python-minimal:
+    # NumPy only: the package and the NumPy tests must work without xarray
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install ./python pytest
+      - run: pytest python/tests/test_numpy.py -p no:doctest -o addopts=""
+
+  r:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: R
+          extra-packages: any::rcmdcheck
+          needs: check
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          working-directory: R
+          args: 'c("--no-manual")'
+
+  octave-and-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: r-lib/actions/setup-r@v2
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends octave
+      - run: octave-cli --eval "addpath('matlab'); addpath('matlab/tests'); test_gaw"
+      - run: python -m pip install ./python && R CMD INSTALL R
+      - name: Cross-language consistency
+        working-directory: validation
+        run: |
+          python ref_python.py /tmp/ref_python.csv
+          Rscript ref_r.R /tmp/ref_r.csv
+          octave-cli --eval "addpath('../matlab'); ref_octave('/tmp/ref_octave.csv')"
+          python compare.py /tmp/ref_python.csv /tmp/ref_r.csv /tmp/ref_octave.csv ref_python.csv

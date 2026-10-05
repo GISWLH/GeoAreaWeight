@@ -1,3 +1,5 @@
+# Reference values from the R implementation (see compare.py).
+# Usage: Rscript ref_r.R OUT.csv   (requires the installed geoareaweight R package)
 suppressMessages(library(geoareaweight)); args <- commandArgs(TRUE)
 out <- character(0)
 put <- function(k, a) { a <- as.numeric(a); out <<- c(out, sprintf("%s[%d],%.15e", k, seq_along(a) - 1, a)) }

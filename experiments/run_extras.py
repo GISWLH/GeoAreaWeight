@@ -1,7 +1,11 @@
 """Extra analyses: latitude-window, resolution, band contribution, synthetic checks."""
-import sys, json, os
-sys.path.insert(0, "/workspace/geoareaweight/experiments")
-from common import *
+import json
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import (  # noqa: E402
+    D, DOCS, annual, gaw, land_mask_for, np, op, trend_per_decade, xr,
+)
 E = {}
 Dd = D + "/derived"
 
@@ -98,8 +102,8 @@ E["resolution_ncep_interp_T"] = nres
 lat1 = np.arange(-89.5, 90, 1.0); lon1 = np.arange(0.5, 360, 1.0)
 syn = {}
 f = lambda g: np.broadcast_to(g(lat1)[:, None], (lat1.size, lon1.size))
-for nm, g in [("常数场", lambda l: np.ones_like(l) * 5.0), ("cos(lat)", lambda l: np.cos(np.deg2rad(l))),
-              ("|lat| (南北向线性梯度)", lambda l: np.abs(l)), ("纬向平均气温型 30cos²φ-10", lambda l: 30 * np.cos(np.deg2rad(l)) ** 2 - 10)]:
+for nm, g in [("constant field", lambda l: np.ones_like(l) * 5.0), ("cos(lat)", lambda l: np.cos(np.deg2rad(l))),
+              ("|lat| (linear meridional gradient)", lambda l: np.abs(l)), ("temperature-like profile 30cos²φ-10", lambda l: 30 * np.cos(np.deg2rad(l)) ** 2 - 10)]:
     x = f(g)
     syn[nm] = dict(unw=float(gaw.area_mean(x, lat1, lon1, method="none")), w=float(gaw.area_mean(x, lat1, lon1)))
 # random (no latitudinal structure) fields: unweighted vs weighted mean difference ~ 0 on average
@@ -108,14 +112,14 @@ d = []
 for k in range(500):
     x = rng.normal(size=(lat1.size, lon1.size))
     d.append(gaw.area_mean(x, lat1, lon1, method="none") - gaw.area_mean(x, lat1, lon1))
-syn["白噪声场 差值(unw-w) 均值/标准差"] = dict(mean=float(np.mean(d)), std=float(np.std(d)))
+syn["white-noise fields: unweighted - weighted, mean/std"] = dict(mean=float(np.mean(d)), std=float(np.std(d)))
 # polar amplification: trend s(lat)=a+b*|lat|/90 degC/decade
 tr = {}
 for b in (0.0, 0.1, 0.2, 0.4, 0.8):
     s = 0.15 + b * np.abs(lat1) / 90
     x = np.broadcast_to(s[:, None], (lat1.size, lon1.size))
     tr[str(b)] = dict(unw=float(gaw.area_mean(x, lat1, lon1, method="none")), w=float(gaw.area_mean(x, lat1, lon1)))
-syn["极地放大型趋势 s=0.15+b|φ|/90"] = tr
+syn["polar-amplified trend s=0.15+b|φ|/90"] = tr
 E["synthetic"] = syn
 
 # ---- F. normalised gap vs share of variance carried by latitude --------------------------------
@@ -131,20 +135,20 @@ def gapstat(x, la, lo, name):
     return dict(name=name, mean_unw=float(mu), mean_w=float(mw), sigma=float(np.sqrt(var)), lat_var_frac=float(varz / var),
                 gap_over_sigma=float((mu - mw) / np.sqrt(var)))
 gs = []
-gs.append(gapstat(Tc.values, lat, Tc.lon.values, "NCEP R1 气温(全球)"))
+gs.append(gapstat(Tc.values, lat, Tc.lon.values, "NCEP R1 air temperature (global)"))
 ct_ = xr.open_dataset(Dd + "/cru_tmp_annual.nc").tmp.sel(year=slice(1980, 2020)).mean("year")
-gs.append(gapstat(ct_.values, ct_.lat.values, ct_.lon.values, "CRU 气温(陆地)"))
-gs.append(gapstat(gpa.values if False else gpc.groupby("time.year").sum("time", skipna=False).mean("year").values, gpc.lat.values, gpc.lon.values, "GPCC 降水(陆地)"))
-gs.append(gapstat(Pc.values, Pc.lat.values, Pc.lon.values, "GPCP 降水(全球)"))
+gs.append(gapstat(ct_.values, ct_.lat.values, ct_.lon.values, "CRU air temperature (land)"))
+gs.append(gapstat(gpa.values if False else gpc.groupby("time.year").sum("time", skipna=False).mean("year").values, gpc.lat.values, gpc.lon.values, "GPCC precipitation (land)"))
+gs.append(gapstat(Pc.values, Pc.lat.values, Pc.lon.values, "GPCP precipitation (global)"))
 sp_ = xr.open_dataset(Dd + "/spei12_dec.nc").spei12.sel(year=slice(1981, 2022))
-gs.append(gapstat(sp_.mean("year").values, sp_.lat.values, sp_.lon.values, "SPEI-12 时间均值"))
-gs.append(gapstat((sp_ <= -1).where(sp_.notnull()).astype(float).mean("year").values, sp_.lat.values, sp_.lon.values, "SPEI≤−1 出现频率"))
+gs.append(gapstat(sp_.mean("year").values, sp_.lat.values, sp_.lon.values, "SPEI-12 time mean"))
+gs.append(gapstat((sp_ <= -1).where(sp_.notnull()).astype(float).mean("year").values, sp_.lat.values, sp_.lon.values, "SPEI <= -1 frequency"))
 E["gap_vs_latvar"] = gs
 
 # ---- E. land share ----------------------------------------------------------------------------
 lm = land_mask_for(lat1, lon1)
 E["land_share_1deg"] = dict(cell_share=float(lm.mean()), area_share=float(gaw.area_mean(lm.astype(float), lat1, lon1)))
-json.dump(E, open("/workspace/geoareaweight/results/extras.json", "w"), ensure_ascii=False, indent=1)
+json.dump(E, open(DOCS / "extras.json", "w"), ensure_ascii=False, indent=1)
 for k in ("lat_window_sym", "lat_window_pole", "resolution_cru_T", "resolution_gpcc_P", "land_share_1deg", "bands_total_diff_K"):
     print(k); print(json.dumps(E[k], indent=0)[:2500])
 print(json.dumps(E["synthetic"], ensure_ascii=False, indent=0))

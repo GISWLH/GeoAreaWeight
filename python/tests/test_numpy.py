@@ -1,18 +1,12 @@
+"""Tests for the NumPy interface (no optional dependencies)."""
 import numpy as np
 import pytest
 
 import geoareaweight as gaw
 
+from conftest import grid
+
 R = gaw.EARTH_RADIUS
-
-
-def grid(res, pole_points=False):
-    if pole_points:
-        lat = np.arange(-90, 90 + res / 2, res)
-    else:
-        lat = np.arange(-90 + res / 2, 90, res)
-    lon = np.arange(0, 360, res) + (0 if pole_points else res / 2)
-    return lat, lon
 
 
 @pytest.mark.parametrize("res,pole", [(1.0, False), (2.5, True), (0.25, False), (5.0, False)])
@@ -160,34 +154,73 @@ def test_irregular_longitude():
     assert np.all(np.diff(a, axis=1)[:, 1] > 0)
 
 
-xr = pytest.importorskip("xarray")
+def test_unknown_method_is_rejected_everywhere():
+    lat, lon = grid(10.0)
+    lat2, _ = np.meshgrid(lat, lon, indexing="ij")
+    for f in (lambda: gaw.area_weights(lat, method="nonsense"),
+              lambda: gaw.weights_2d(lat, lon, method="nonsense"),
+              lambda: gaw.weights_2d(lat2, method="nonsense"),
+              lambda: gaw.area_mean(np.ones(lat2.shape), lat, lon, method="nonsense")):
+        with pytest.raises(ValueError, match="unknown method"):
+            f()
 
 
-def test_xarray_roundtrip_matches_numpy():
-    lat, lon = grid(5.0)
-    t = np.arange(6)
-    data = np.random.default_rng(4).normal(size=(6, lat.size, lon.size))
-    da = xr.DataArray(data, dims=("time", "lat", "lon"), coords={"time": t, "lat": lat, "lon": lon}, name="v")
-    r = gaw.area_mean(da)
-    assert isinstance(r, xr.DataArray) and r.dims == ("time",)
-    np.testing.assert_allclose(r.values, gaw.area_mean(data, lat, lon))
-    # (lon, lat, time) order and descending lat
-    da2 = da.transpose("lon", "lat", "time").isel(lat=slice(None, None, -1))
-    np.testing.assert_allclose(gaw.area_mean(da2).values, r.values)
-    r_ref = xr.DataArray(data, dims=("time", "lat", "lon"), coords={"lat": lat, "lon": lon}).weighted(
-        xr.DataArray(gaw.cell_area(lat, lon), dims=("lat", "lon"), coords={"lat": lat, "lon": lon})
-    ).mean(("lat", "lon"))
-    np.testing.assert_allclose(r.values, r_ref.values)
+def test_2d_lat_band_warns_and_aliases_work():
+    lat, lon = grid(10.0)
+    lat2, _ = np.meshgrid(lat, lon, indexing="ij")
+    with pytest.warns(UserWarning, match="cos"):
+        w = gaw.weights_2d(lat2, method="sphere_band", normalize=False)
+    np.testing.assert_allclose(w, np.cos(np.deg2rad(lat2)))
+    np.testing.assert_allclose(gaw.area_weights(lat, method="WGS84"),
+                               gaw.area_weights(lat, method="ellipsoid"))
+    np.testing.assert_allclose(gaw.weights_2d(lat, lon, method="unweighted"), 1 / lat2.size)
 
 
-def test_wgs84_cell_area_matches_cylindrical_equal_area_projection():
-    """Independent check: EPSG:6933 (WGS84 cylindrical equal-area) -> cell area = dx*dy."""
-    pyproj = pytest.importorskip("pyproj")
-    tr = pyproj.Transformer.from_crs(4326, 6933, always_xy=True)
-    for lat0, lat1 in [(0, 1), (40, 41), (40, 50), (-89, -80), (80, 90), (65, 66)]:
-        x0, y0 = tr.transform(10.0, lat0)
-        x1, y1 = tr.transform(11.0, lat1)
-        ref = abs((x1 - x0) * (y1 - y0))
-        a = gaw.cell_area(np.array([(lat0 + lat1) / 2]), np.array([10.5]), lat_bounds=[lat0, lat1],
-                          lon_bounds=[10, 11], ellipsoid=True)[0, 0]
-        assert a == pytest.approx(ref, rel=1e-9), (lat0, lat1)
+def test_masked_arrays_are_treated_as_missing():
+    lat, lon = grid(10.0)
+    x = np.ma.masked_array(np.ones((lat.size, lon.size)), mask=False)
+    x.data[0, 0] = 9.96921e36   # netCDF fill value
+    x[0, 0] = np.ma.masked
+    assert gaw.area_mean(x, lat, lon) == pytest.approx(1.0)
+
+
+def test_numeric_masks_nan_and_zero_exclude():
+    lat, lon = grid(10.0)
+    x = np.random.default_rng(8).normal(size=(lat.size, lon.size))
+    sel = np.broadcast_to(lat[:, None] > 30, x.shape)
+    ref = gaw.area_mean(x, lat, lon, mask=sel)
+    assert gaw.area_mean(x, lat, lon, mask=np.where(sel, 1.0, np.nan)) == pytest.approx(ref)
+    assert gaw.area_mean(x, lat, lon, mask=sel.astype(int)) == pytest.approx(ref)
+    # (nlon, nlat) masks / weights are transposed automatically
+    assert gaw.area_mean(x, lat, lon, mask=sel.T) == pytest.approx(ref)
+    a = gaw.cell_area(lat, lon)
+    assert gaw.area_mean(x, weights=a.T) == pytest.approx(gaw.area_mean(x, lat, lon))
+    with pytest.raises(ValueError, match="non-negative"):
+        gaw.area_mean(x, weights=-a)
+    with pytest.raises(ValueError, match="shape"):
+        gaw.area_mean(x, lat, lon, mask=np.ones((3, 3), bool))
+
+
+def test_longitudes_crossing_the_wrap_point():
+    lat = np.array([-45.0, 45.0])
+    lon_wrapped = np.r_[np.arange(182.5, 360, 5.0), np.arange(2.5, 180, 5.0)]
+    a = gaw.cell_area(lat, lon_wrapped)
+    np.testing.assert_allclose(a, a[:, :1] * np.ones_like(a))
+    assert a.sum() == pytest.approx(4 * np.pi * R ** 2 * (gaw.band_weights(lat, normalize=False).sum() / 2))
+    np.testing.assert_allclose(gaw.cell_area(lat, [359.5, 0.5], lon_bounds=[[359, 0], [0, 1]]),
+                               gaw.cell_area(lat, [0.5, 1.5], lon_bounds=[0, 1, 2]))
+    np.testing.assert_allclose(gaw.cell_area(lat, np.arange(-177.5, 180, 5.0)), a)
+
+
+def test_skipna_false_on_complete_data():
+    lat, lon = grid(10.0)
+    x = np.random.default_rng(11).normal(size=(3, lat.size, lon.size))
+    np.testing.assert_allclose(gaw.area_mean(x, lat, lon, skipna=False), gaw.area_mean(x, lat, lon))
+    np.testing.assert_allclose(gaw.area_integral(x, lat, lon, skipna=False), gaw.area_integral(x, lat, lon))
+    x[1, 0, 0] = np.nan
+    r = gaw.area_mean(x, lat, lon, skipna=False)
+    assert np.isnan(r[1]) and np.isfinite(r[[0, 2]]).all()
+    # a NaN outside the mask does not matter
+    mask = np.ones(x.shape[1:], bool)
+    mask[0, 0] = False
+    assert np.isfinite(gaw.area_mean(x, lat, lon, mask=mask, skipna=False)).all()

@@ -3,11 +3,16 @@ Type: Package
 Title: Area Weights and Area-Weighted Means for Latitude-Longitude Grids
 Version: 0.1.0
 Authors@R: person("Longhao", "Wang", role = c("aut", "cre"), email = "hhuwlh@163.com")
-Description: Cosine-latitude, exact spherical band and WGS84 authalic cell-area weights,
-    and NaN-aware area-weighted means, regional means, integrals and area fractions
-    for regular, irregular and Gaussian latitude-longitude grids.
+Description: Correct area weights for latitude-longitude grids: cosine-latitude,
+    exact spherical band areas and exact WGS84 (authalic latitude) cell areas.
+    Provides NaN-aware area-weighted means, regional (masked) means, area
+    integrals (totals) and area fractions for regular, irregular and Gaussian
+    grids, keeping time and other dimensions.
 License: MIT + file LICENSE
 URL: https://github.com/GISWLH/GeoAreaWeight
 BugReports: https://github.com/GISWLH/GeoAreaWeight/issues
 Encoding: UTF-8
-Suggests: testthat
+Language: en-US
+Depends: R (>= 3.5)
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3

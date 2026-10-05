@@ -1,4 +1,6 @@
 function ref_octave(fname)
+%REF_OCTAVE  Reference values from the MATLAB/Octave implementation (see compare.py).
+%   octave-cli --eval "addpath('../matlab'); ref_octave('ref_octave.csv')"
 lat = (-90:2.5:90)'; lon = 0:2.5:357.5; nt = 5; nl = numel(lon); nla = numel(lat);
 x = zeros(nl, nla, nt);
 for i = 1:nl, for j = 1:nla, for t = 1:nt

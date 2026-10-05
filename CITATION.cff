@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use GeoAreaWeight, please cite it as below."
+title: "GeoAreaWeight: area weights and area-weighted statistics for latitude-longitude grids"
+type: software
+authors:
+  - family-names: Wang
+    given-names: Longhao
+    email: hhuwlh@163.com
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/GISWLH/GeoAreaWeight"
+keywords:
+  - area-weighted mean
+  - latitude weighting
+  - grid cell area
+  - climate data
+  - xarray
+abstract: >-
+  Correct area weights (cos-latitude, exact spherical band area, exact WGS84 cell area)
+  and NaN-aware area-weighted means, regional means, area integrals and area fractions
+  for latitude-longitude grids, with identical APIs in Python, R and MATLAB/Octave.

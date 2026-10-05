@@ -1,24 +1,69 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "geoareaweight"
-version = "0.1.0"
-description = "Area (cos-latitude / exact cell-area / WGS84) weights and weighted means for lat-lon grids"
+dynamic = ["version"]
+description = "Correct area weights and area-weighted means, totals and area fractions for latitude-longitude grids (NumPy/xarray)"
 readme = "README.md"
-license = {text = "MIT"}
-authors = [{name = "Longhao Wang", email = "hhuwlh@163.com"}]
-requires-python = ">=3.9"
-dependencies = ["numpy>=1.20"]
-[project.optional-dependencies]
-xarray = ["xarray"]
-test = ["pytest", "xarray"]
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Longhao Wang", email = "hhuwlh@163.com" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.23"]
+keywords = [
+    "area-weighted mean", "latitude weighting", "cosine latitude", "grid cell area",
+    "climate", "geoscience", "xarray", "netcdf", "global mean", "WGS84",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Typing :: Typed",
+]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-[tool.pytest.ini_options]
-testpaths = ["tests"]
+[project.optional-dependencies]
+xarray = ["xarray>=2022.6"]
+test = ["pytest>=7", "xarray>=2022.6", "dask[array]", "pyproj>=3"]
+dev = ["geoareaweight[test]", "ruff", "build", "twine"]
 
 [project.urls]
 Homepage = "https://github.com/GISWLH/GeoAreaWeight"
+Documentation = "https://github.com/GISWLH/GeoAreaWeight#readme"
+Source = "https://github.com/GISWLH/GeoAreaWeight"
+Issues = "https://github.com/GISWLH/GeoAreaWeight/issues"
+Changelog = "https://github.com/GISWLH/GeoAreaWeight/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = { attr = "geoareaweight.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+geoareaweight = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src"]
+addopts = ["--doctest-modules", "-ra"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["geoareaweight"]
+known-local-folder = ["conftest"]

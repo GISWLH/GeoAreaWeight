@@ -1,3 +1,8 @@
+"""Reference values from the Python implementation (see compare.py).
+
+Usage: python ref_python.py OUT.csv
+The same test fields are built in ref_r.R and ref_octave.m (1-based indices there).
+"""
 import sys, numpy as np, geoareaweight as g
 out=[]
 def put(k,a):

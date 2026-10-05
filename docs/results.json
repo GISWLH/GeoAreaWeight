@@ -1,7 +1,7 @@
 {
  "rows": [
   {
-   "name": "NCEP R1 气温 全球(含海洋)",
+   "name": "NCEP R1 air temperature, global (land + ocean)",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -17,7 +17,7 @@
    "trend_rel_pct": 75.14008718061461
   },
   {
-   "name": "NCEP R1 气温 仅陆地(含南极)",
+   "name": "NCEP R1 air temperature, land incl. Antarctica",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -33,7 +33,7 @@
    "trend_rel_pct": 52.68968697914086
   },
   {
-   "name": "NCEP R1 气温 仅陆地(不含南极)",
+   "name": "NCEP R1 air temperature, land excl. Antarctica",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -49,7 +49,7 @@
    "trend_rel_pct": 21.697898159956043
   },
   {
-   "name": "NCEP R1 气温 60-90N",
+   "name": "NCEP R1 air temperature, 60-90N",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -65,7 +65,7 @@
    "trend_rel_pct": 25.64747815218397
   },
   {
-   "name": "NCEP R1 气温 30S-30N",
+   "name": "NCEP R1 air temperature, 30S-30N",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -81,7 +81,7 @@
    "trend_rel_pct": 0.23877572854802623
   },
   {
-   "name": "NCEP R1 气温 0-90N",
+   "name": "NCEP R1 air temperature, 0-90N",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -97,7 +97,7 @@
    "trend_rel_pct": 67.34518332341494
   },
   {
-   "name": "GISTEMP v4 温度异常 全球",
+   "name": "GISTEMP v4 temperature anomaly, global",
    "kind": "Tanom",
    "unit": "K",
    "period": "1980-2020",
@@ -106,14 +106,14 @@
    "mean_w": 0.5207983893209204,
    "trend_unw": 0.2606299562888065,
    "trend_w": 0.19507074917962938,
-   "note": "NaN 处权重重新归一",
+   "note": "weights renormalised over non-NaN cells",
    "mean_diff": 0.06423844586924643,
    "mean_rel_pct": 12.334609166708109,
    "trend_diff": 0.06555920710917709,
    "trend_rel_pct": 33.607912711099196
   },
   {
-   "name": "GPCP 降水 全球(含海洋)",
+   "name": "GPCP precipitation, global (land + ocean)",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -129,7 +129,7 @@
    "trend_rel_pct": 54.71050772100172
   },
   {
-   "name": "GPCP 降水 仅陆地(含南极/格陵兰)",
+   "name": "GPCP precipitation, land incl. Antarctica/Greenland",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -145,7 +145,7 @@
    "trend_rel_pct": 58.10519129346177
   },
   {
-   "name": "GPCP 降水 仅陆地(不含南极)",
+   "name": "GPCP precipitation, land excl. Antarctica",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -161,7 +161,7 @@
    "trend_rel_pct": 351.4775681323631
   },
   {
-   "name": "GPCC v2020 降水 陆地(观测网格, 1°)",
+   "name": "GPCC v2020 precipitation, land (observed cells, 1°)",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2019",
@@ -170,14 +170,14 @@
    "mean_w": 901.7806828832365,
    "trend_unw": 5.561009602615875,
    "trend_w": 5.600821049009472,
-   "note": "GPCC 仅陆地, 其余为 NaN",
+   "note": "GPCC is land-only; other cells are NaN",
    "mean_diff": -128.27429781156047,
    "mean_rel_pct": -14.224555953165117,
    "trend_diff": -0.039811446393597016,
    "trend_rel_pct": -0.7108144689007307
   },
   {
-   "name": "NCEP R1 潜热通量→蒸散发代用 陆地(T62 高斯网格)",
+   "name": "NCEP R1 ET proxy from latent heat flux, land (T62 Gaussian grid)",
    "kind": "ET",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -186,14 +186,14 @@
    "mean_w": 652.3797896700715,
    "trend_unw": -1.470036493537089,
    "trend_w": -4.223343245041388,
-   "note": "反演代用量, 非观测",
+   "note": "reanalysis proxy, not an observation",
    "mean_diff": -165.48827543308198,
    "mean_rel_pct": -25.36686115257716,
    "trend_diff": 2.753306751504299,
    "trend_rel_pct": 65.1925877617678
   },
   {
-   "name": "NCEP R1 蒸散发代用 陆地(不含南极)",
+   "name": "NCEP R1 ET proxy, land excl. Antarctica",
    "kind": "ET",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -209,7 +209,7 @@
    "trend_rel_pct": 34.73108553214726
   },
   {
-   "name": "NCEP R1 降水 陆地(不含南极)",
+   "name": "NCEP R1 precipitation, land excl. Antarctica",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -225,7 +225,7 @@
    "trend_rel_pct": -21.471852999544936
   },
   {
-   "name": "OISST v2 海温 全海洋(1°)",
+   "name": "OISST v2 SST, global ocean (1°)",
    "kind": "SST",
    "unit": "°C",
    "period": "1982-2022",
@@ -241,7 +241,7 @@
    "trend_rel_pct": -9.94941579705611
   },
   {
-   "name": "OISST 海冰密集度 年均 50-90°N 海洋",
+   "name": "OISST sea-ice concentration, annual mean, 50-90N ocean",
    "kind": "ICE",
    "unit": "%",
    "period": "1982-2022",
@@ -257,7 +257,7 @@
    "trend_rel_pct": -38.091517301646505
   },
   {
-   "name": "OISST 9月北极海冰覆盖面积占比(>=15%, 50-90°N海洋)",
+   "name": "OISST September sea-ice area fraction (conc. >= 15%, 50-90N ocean)",
    "kind": "ICEFRAC",
    "unit": "fraction",
    "period": "1982-2022",
@@ -273,7 +273,7 @@
    "trend_rel_pct": -29.173793594014594
   },
   {
-   "name": "CRU TS4.09 气温 陆地(0.5°, 无南极)",
+   "name": "CRU TS4.09 air temperature, land (0.5°, no Antarctica)",
    "kind": "T",
    "unit": "°C",
    "period": "1980-2020",
@@ -289,7 +289,7 @@
    "trend_rel_pct": 13.847977542838693
   },
   {
-   "name": "CRU TS4.09 降水 陆地(0.5°, 无南极)",
+   "name": "CRU TS4.09 precipitation, land (0.5°, no Antarctica)",
    "kind": "P",
    "unit": "mm/yr",
    "period": "1980-2020",
@@ -305,7 +305,7 @@
    "trend_rel_pct": -9.56922838563266
   },
   {
-   "name": "SPEI-12 (12月) 陆地平均值",
+   "name": "SPEI-12 (December), land mean",
    "kind": "SPEI",
    "unit": "index",
    "period": "1981-2022",
@@ -321,7 +321,7 @@
    "trend_rel_pct": 6.147807722823052
   },
   {
-   "name": "SPEI-12 SPEI<=-1 (中度及以上干旱) 面积占比",
+   "name": "SPEI-12 <= -1 (moderate or worse drought), area fraction",
    "kind": "DAREA",
    "unit": "fraction",
    "period": "1981-2022",
@@ -337,7 +337,7 @@
    "trend_rel_pct": -1.0467062358721224
   },
   {
-   "name": "SPEI-12 SPEI<=-1.5 (严重干旱) 面积占比",
+   "name": "SPEI-12 <= -1.5 (severe drought), area fraction",
    "kind": "DAREA",
    "unit": "fraction",
    "period": "1981-2022",
@@ -353,7 +353,7 @@
    "trend_rel_pct": 3.0089807679970537
   },
   {
-   "name": "SPEI-12<=-1 面积占比 (排除年降水<180 mm 干旱区)",
+   "name": "SPEI-12 <= -1 area fraction, excl. arid cells (P < 180 mm/yr)",
    "kind": "DAREA",
    "unit": "fraction",
    "period": "1981-2022",

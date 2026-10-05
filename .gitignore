@@ -13,3 +13,6 @@ dist/
 *.nc
 *.nc.gz
 .DS_Store
+data/
+.mypy_cache/
+.ruff_cache/

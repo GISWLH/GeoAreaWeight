@@ -1,3 +1,7 @@
+<!-- readme-visual-refresh:banner -->
+![GeoAreaWeight — hand-drawn project banner](assets/readme/banner.svg)
+<!-- /readme-visual-refresh:banner -->
+
 # GeoAreaWeight
 
 [![CI](https://github.com/GISWLH/GeoAreaWeight/actions/workflows/ci.yml/badge.svg)](https://github.com/GISWLH/GeoAreaWeight/actions/workflows/ci.yml)
@@ -228,3 +232,7 @@ If you use GeoAreaWeight in published work, please cite it (see
 ## License
 
 MIT © 2026 Longhao Wang
+
+<!-- readme-visual-refresh:artwork-source -->
+[Editable banner artwork · Excalidraw](assets/readme/banner.excalidraw)
+<!-- /readme-visual-refresh:artwork-source -->
